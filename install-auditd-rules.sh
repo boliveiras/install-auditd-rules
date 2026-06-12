@@ -33,7 +33,7 @@ set -Eeuo pipefail
 # Metadados
 # =============================================================================
 readonly SCRIPT_NAME="${0##*/}"
-readonly SCRIPT_VERSION="2.1.0"
+readonly SCRIPT_VERSION="2.1.1"
 
 # =============================================================================
 # Configuração padrão (sobrescrevível por variáveis de ambiente ou flags)
@@ -188,14 +188,30 @@ pkg_install() { # pkg_install <pacote...>
     [[ -n "$PKG_MGR" ]] || die "Nenhum gerenciador de pacotes suportado encontrado. Instale manualmente: $*"
     log_info "Instalando via ${PKG_MGR}: $*"
     case "$PKG_MGR" in
-        apt)    run env DEBIAN_FRONTEND=noninteractive apt-get update -qq
-                run env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@" ;;
+        apt)    pkg_install_apt "$@" ;;
         dnf)    run dnf install -y "$@" ;;
         yum)    run yum install -y "$@" ;;
         zypper) run zypper --non-interactive install -y "$@" ;;
         pacman) run pacman -Sy --noconfirm "$@" ;;
         apk)    run apk add --no-cache "$@" ;;
     esac
+}
+
+# apt/apt-get com tolerância a falhas de rede dual-stack: se o 'update' falhar
+# (problema comum de IPv6 sem rota), tenta novamente forçando IPv4 e propaga
+# essa opção para o 'install'.
+pkg_install_apt() { # pkg_install_apt <pacote...>
+    local apt_opts=()
+    if ! run env DEBIAN_FRONTEND=noninteractive apt-get update -qq; then
+        log_warn "apt-get update falhou; tentando novamente forçando IPv4 (rede dual-stack)..."
+        if run env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::ForceIPv4=true update -qq; then
+            apt_opts=(-o Acquire::ForceIPv4=true)
+            log_ok "Atualização via IPv4 bem-sucedida."
+        else
+            log_warn "Atualização ainda falhou; prosseguindo com os índices já existentes."
+        fi
+    fi
+    run env DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install -y "$@"
 }
 
 # Nomes de pacote do auditd variam conforme a distro.
