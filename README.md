@@ -4,8 +4,6 @@ Instala o `auditd` em qualquer distro Linux e troca o ruleset padrão (que vem
 vazio) por um conjunto de regras de auditoria de verdade, baseado no excelente
 template de [Florian Roth / Nextron Systems](https://github.com/Neo23x0/auditd).
 
-É um único script, sem dependências. Roda e pronto.
-
 ## Uso
 
 ```bash
