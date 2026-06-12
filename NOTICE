@@ -1,0 +1,24 @@
+install-auditd-rules
+Copyright 2026 Bruno Santos
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this software except in compliance with the License.
+A copy of the License is included in the file LICENSE.
+
+-------------------------------------------------------------------------------
+Third-party content
+-------------------------------------------------------------------------------
+
+This project deploys an audit ruleset that is the work of a third party and is
+redistributed UNMODIFIED under its own license:
+
+    Linux Audit Daemon - Best Practice Configuration
+    Copyright Florian Roth / Nextron Systems
+    https://github.com/Neo23x0/auditd
+    Licensed under the Apache License, Version 2.0
+
+At runtime the installer downloads the latest version of this ruleset from the
+upstream repository. If the download is unavailable, it falls back to a
+self-contained copy embedded in install-auditd-rules.sh (see the
+print_embedded_rules function), which preserves the original header and
+attribution. All credit for the audit ruleset belongs to its original author.
